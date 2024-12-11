@@ -1,10 +1,11 @@
-import cv2
+import cv2#open cv
 import pytesseract
 from PIL import Image
 from matplotlib import pyplot as plt
 import tkinter as tk
 from tkinter import ttk,Toplevel,filedialog,messagebox
 import time
+from docx import Document
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -87,35 +88,50 @@ def loading_window():
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
     
-def show_text_in_dialog(text):
-    # Assign the text to a variable
-    text_to_display = text
-    
-    # Create the main window (it will not appear)
+# Function to create a dialog box and save text to DOCX
+def open_text_dialog_and_save(text):
+    # Function to save text to a new DOCX file
+    def save_to_docx(text):
+        # Ask the user to select a location to save the DOCX file
+        file_path = filedialog.asksaveasfilename(defaultextension=".docx", filetypes=[("Word Document", "*.docx")])
+        
+        if file_path:
+            try:
+                # Create a new Document object
+                doc = Document()
+                # Add the provided text to the document
+                doc.add_paragraph(text)
+                # Save the document
+                doc.save(file_path)
+                messagebox.showinfo("Success", "File saved successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save file: {e}")
+
+    # Function to exit the application
+    def exit_app():
+        root.quit()
+
+    # Create the main window (root)
     root = tk.Tk()
-    root.withdraw()  # Hide the main window (since we're just using the dialog)
+    root.title("Text Display and Save")
 
-    # Create a custom top-level window (dialog)
-    dialog = Toplevel(root)
-    dialog.title("Output")
-    
-    # Create a label with the text you want to display
-    label = tk.Label(dialog, text=text_to_display, padx=50, pady=20)
-    label.pack()
+    # Create a Text widget to display and modify text
+    text_widget = tk.Text(root, height=10, width=50)
+    text_widget.pack(pady=10)
 
-    # Create a close button to dismiss the dialog
-    close_button = tk.Button(dialog, text="Close", command=root.destroy)
-    close_button.pack(pady=10)
+    # Insert some sample text into the Text widget
+    text_widget.insert(tk.END, text)
 
-    # Prevent the dialog window from resizing
-    dialog.resizable(True, True)
+    # Create the Save button
+    save_button = tk.Button(root, text="Save to DOCX", command=lambda: save_to_docx(text_widget.get("1.0", tk.END)))
+    save_button.pack(side=tk.LEFT, padx=10, pady=10)
 
-    # Center the dialog window on the screen
-    dialog.geometry(f"+{root.winfo_screenwidth() // 2 - dialog.winfo_reqwidth() // 2}+{root.winfo_screenheight() // 2 - dialog.winfo_reqheight() // 2}")
+    # Create the Exit button
+    exit_button = tk.Button(root, text="Exit", command=root.destroy)
+    exit_button.pack(side=tk.RIGHT, padx=10, pady=10)
 
-    # Run the custom dialog
-    dialog.mainloop()
-    
+    # Run the Tkinter event loop
+    root.mainloop()    
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------
 root = tk.Tk()
@@ -147,6 +163,6 @@ loading_window()
 custom_config = r'--oem 3 --psm 6'  # Use LSTM OCR engine and block of text mode
 ocr = pytesseract.image_to_string(binaryimg, config = custom_config)
 #print(ocr)
-show_text_in_dialog(ocr)
+open_text_dialog_and_save(ocr)
 
 
