@@ -1,4 +1,4 @@
-install python files
+install python libraries: 
 
 pillow - pip install pillow
 
